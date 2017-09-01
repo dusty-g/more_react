@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {shuffle} from "underscore"
 import logo from './logo.svg';
 import './App.css';
 
@@ -15,7 +16,14 @@ class Question extends Component{
     )
   }
 }
-
+function Score(props){
+  return (
+    <div style={{display: "inline-block"}}>
+    <h2>Correct: {props.correct}</h2>
+    <h2>Incorrect: {props.incorrect}</h2>
+    </div>
+  )
+}
 class App extends Component {
   constructor(props){
     super(props)
@@ -23,28 +31,58 @@ class App extends Component {
     var answers = [["1", "9", "12", "10"],["detroit", "phoenix", "boise"],["6", "2", "1"]]
     var key = [1,2,0]
     var current = 0
+    
     questions = questions.map((question)=>{
       return (<Question question = {question} />)
     })
     this.buttonClick = this.buttonClick.bind(this)
-    this.state = {key:key, correct:0, incorrect:0, current:current, question: questions[current], answers: answers[current]}
+    this.state = {key:key, correct:0, incorrect:0, current:current, questions: questions, answers: answers}
   }
   makeButtons(ansList){
+
     let output = []
     for(let i = 0; i<ansList.length;i++){
       output.push(<Button key={i} id={i} answer = {ansList[i]} click= {this.buttonClick}/>)
     }
-    return output
+    return shuffle(output)
   }
   buttonClick(key){
     console.log(key)
+    if(key === this.state.key[this.state.current]){
+      console.log(this.state)
+      this.setState((prevState, props)=>{
+        {prevState.correct++}
+      })
+    }else{
+      this.setState((prevState, props)=>{
+        {prevState.incorrect++}
+      })
+    }
+        this.setState((prevState, props)=>{
+          {prevState.current++}
+        })
   }
   render() {
-    let buttons = this.makeButtons(this.state.answers)
+    let buttons;
+    if(this.state.current >= this.state.questions.length){
+      return(
+        <div>
+        <h1>end</h1>
+        <Score correct={this.state.correct} incorrect={this.state.incorrect}/>
+        </div>
+      )
+    }else{
+
+       buttons = this.makeButtons(this.state.answers[this.state.current])
+    }
     return (
       <div>
-      {this.state.question}
-      {buttons}
+        <div style={{display: "inline-block", width:"65%"}}>
+        {this.state.questions[this.state.current]}
+        {buttons}
+        
+        </div>
+        <Score correct={this.state.correct} incorrect={this.state.incorrect}/>
       </div>
     );
   }
